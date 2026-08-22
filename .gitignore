@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# build artifacts
+*.tgz
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem

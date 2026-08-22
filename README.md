@@ -1,0 +1,133 @@
+# dsh-deepseek-console — DeepSeek 账户控制台
+
+[中文](README.md) · [English](README_EN.md)
+
+> 一个为 DeepSeek Harness Web GUI 打造的 **DeepSeek 账户控制台**：官方 API 直连的实时余额监控、本地用量/费用统计、全局悬浮 HUD。
+
+模型每思考一次，余额都在变化——这个插件让你随时看到花了多少钱。它通过 DeepSeek **官方** `GET /user/balance` 接口同步余额（现金/赠送分离），监听本机模型调用统计 Token 与费用，并以一个可拖拽的全局悬浮球常驻界面右下角。
+
+以 **DSH 官方插件形态**（Cordis bundle：host 半 + client 半单包）实现，随 `dsh web` 启动自动加载。
+
+## ✨ 功能一览
+
+| 功能 | 说明 |
+|---|---|
+| 实时余额监控 | 官方 `GET /user/balance` 直连，现金余额 / 赠送余额分离展示，5s 缓存 + 可强制刷新 |
+| 余额历史 | 自动记录每次余额变化（增加 / 减少 / 首次），可回看变化记录 |
+| 本地用量统计 | 监听 `llm/stream` 事件，按任务与按日累计 Token（输入/输出/缓存命中）与费用 |
+| 全局悬浮 HUD | 右下角可拖拽悬浮球 `● DS ¥xx.xx`，实时显示账户余额与当前任务费用；悬停展开、点击跳转设置页 |
+| 任务级费用 | 每次对话累计本次 Token 与估算费用，实时反映当前任务的花费 |
+| 官方模型清单 | 拉取 `GET /models`，展示模型上下文窗口与价格档位 |
+| Key 零暴露 | API Key 只存本机后端凭证库（`~/.dsh/.credentials.yaml`），浏览器端仅见 `sk-****末4位` |
+| 无第三方依赖 | 后端用 `subprocess + curl` 直连官方 API，不引入任何 SDK / 代理 |
+
+## 📊 数据来源
+
+- **余额**：DeepSeek 官方 `GET /user/balance`（`total_balance` / `granted_balance` / `topped_up_balance`），每次请求指数退避重试（1s/2s/4s，最多 3 次），401/403 不重试。
+- **用量 / 费用**：监听 Harness 的 `llm/stream` 瀑布事件，统计每次模型调用的 Token 与耗时；费用按可配置的价格表估算（官方定价为默认值，可在「高级设置」覆盖）。
+- **模型列表**：官方 `GET /models`。
+
+> DeepSeek 官方**没有**用量/账单/日志查询 API——本插件的用量与费用均为**本地统计**，与官方账单可能有细微出入（价格档位、缓存计费口径）。
+
+## 🏗 架构
+
+```
+┌──────────────────── 浏览器（Client 半 lib/client.js）────────────────────┐
+│  4-Tab 控制台（概览/模型/连接/高级设置） · 全局悬浮 HUD · Cordis 面板卡片   │
+│        │ 同源 fetch（/api/deepseek/*）                                   │
+└────────▼──────────────────────────────────────────────────────────────────┘
+┌──────────────────── 宿主进程（Host 半 lib/index.js）─────────────────────┐
+│  DeepSeekClient ── subprocess + curl ──▶ 官方 API（/user/balance、/models）│
+│  余额缓存（5s） · 余额历史 · 任务/每日 Token 与费用统计 · 持久化           │
+│  webServer 路由 /api/deepseek/*（浏览器直接 HTTP 调用，无需 RPC）          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### 数据流
+
+1. Client 半启动后每 2s 轮询 `GET /api/deepseek/hud`（当前任务 + 余额摘要），悬浮球实时刷新。
+2. 控制台「概览」页调用 `GET /api/deepseek/account`（含当日/当月用量汇总）与 `GET /api/deepseek/usage?range=7d`。
+3. Host 半监听 `agent/status`（任务边界）与 `llm/stream`（token/费用累计），写入每日流水。
+4. 历史与配置持久化在 `~/.dsh/storages/deepseek_console.json`，重启不丢。
+
+## 🔌 安装
+
+### 方式一：组合插件（推荐，开机自动启用）
+
+```sh
+# 从本地路径安装（link 模式，改代码无需重装）
+dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
+
+# 重启 DSH web 进程
+# （Ctrl+C 后重新 dsh web，或你的启动方式）
+```
+
+安装后 **重启 `dsh web`**，插件随进程自动加载；右下角出现悬浮球，设置 → DeepSeek 出现控制台。link 模式下改代码后 `node --check` + 刷新页面即可，无需重装。
+
+### 方式二：手动组合行
+
+把 `cordis.patch.yml` 的内容并入 `~/.dsh/profiles/web/cordis.patch.yml`：
+
+```yaml
+- insert:
+    - id: deepseek-console
+      name: '@local/dsh-deepseek-console'
+```
+
+并确保包位于 profile 可解析的 `node_modules` 下（如 `~/.dsh/profiles/web/node_modules/@local/dsh-deepseek-console/`），然后重启。
+
+> ⚠️ 两种方式二选一，不要同时使用，否则会双挂载（两套 host 路由）。
+
+## 🖥 使用
+
+- **悬浮球**（右下角）：显示 `● DS ¥xx.xx` 当前余额；悬停展开详情（余额 / 本次费用），点击打开控制台；按住可拖拽（位置自动吸附边缘并持久化）。
+- **设置 → DeepSeek**：
+  - **概览**：余额大数字 + 现金/赠送明细、今日/本月消费、当前任务 Token 与费用、余额变化历史。
+  - **模型**：官方模型清单（上下文窗口、价格档位）。
+  - **连接**：API Key 配置（只写本机凭证库）、Base URL、连接测试。
+  - **高级设置**：轮询间隔、缓存 TTL、超时、费用估算价格档位与模型价格表。
+
+## 🔑 API Key 配置
+
+Key 存于本机凭证库（`~/.dsh/.credentials.yaml`，`DEEPSEEK_API_KEY`），或直接在「连接」页输入保存。Key 永远只存在于宿主进程内，日志与浏览器只输出 `sk-****末4位`。
+
+## 🔐 安全模型
+
+- API Key 仅经 `credentials` 服务读取，绝不写入前端、日志脱敏。
+- `/api/deepseek/*` 路由仅绑定本机 webServer（loopback），同源浏览器访问。
+- 请求重试遵循官方限流语义：401/403 立即失败不重试，429/5xx/超时退避重试。
+- 持久化文件权限默认继承 DSH storage 目录。
+
+## 🔧 开发
+
+```sh
+node --check lib/index.js     # host 语法
+node --check lib/client.js    # client 语法
+```
+
+- Host 半：CJS，`module.exports = { name, inject, apply }`，用 `ctx.get('webServer'/'storage'/'credentials'/'subprocess')` 等可选服务。
+- Client 半：`window.__ModuleLoader__.load` 格式，`require('react')`，同源 `fetch` 走 `/api/deepseek/*`，`inject: ['timer', 'slots']`。
+- 修改后刷新页面即可（组合插件经 client-modules 增量重扫，rev 自动变化）。
+
+## 🧾 后端 API
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/deepseek/account` | 账户摘要（余额 / 用量 / 同步状态 / Key 事实） |
+| GET | `/api/deepseek/balance?refresh=true` | 余额（带缓存，可强制刷新） |
+| POST | `/api/deepseek/refresh` | 强制刷新余额 |
+| GET | `/api/deepseek/usage?range=7d` | 按日用量与合计（7d/30d/90d） |
+| GET | `/api/deepseek/history?limit=50` | 余额变化历史 |
+| GET | `/api/deepseek/calls?limit=20` | 最近模型调用 |
+| GET | `/api/deepseek/models` | 官方模型清单 + 价格 |
+| GET | `/api/deepseek/config` | 当前配置与 Key 事实 |
+| POST | `/api/deepseek/saveConfig` | 保存配置（轮询/TTL/超时/价格档） |
+| POST | `/api/deepseek/saveKey` | 保存 API Key |
+| POST | `/api/deepseek/test` | 连接测试 |
+| GET | `/api/deepseek/hud` | 悬浮球数据（任务 + 余额） |
+
+所有响应均为 `{ code: 0, message: 'success', data: ... }`。
+
+## ⚖️ License
+
+[MIT](LICENSE)

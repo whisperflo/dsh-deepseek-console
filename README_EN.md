@@ -1,0 +1,133 @@
+# dsh-deepseek-console — DeepSeek Account Console
+
+[中文](README.md) · [English](README_EN.md)
+
+> A **DeepSeek account console** for the DeepSeek Harness Web GUI: real-time balance monitoring against the official API, local usage/cost statistics, and a global floating HUD.
+
+Every model thought moves your balance — this plugin lets you always see what it costs. It syncs your balance (cash/granted separated) through the DeepSeek **official** `GET /user/balance` endpoint, tallies tokens and costs from local model calls, and keeps a draggable floating ball in the corner of the UI.
+
+Shipped as the official DSH plugin shape (Cordis bundle: host half + client half in one package), auto-loaded when `dsh web` starts.
+
+## ✨ Features
+
+| Feature | Description |
+|---|---|
+| Real-time balance | Official `GET /user/balance`, cash / granted balance shown separately, 5s cache + forced refresh |
+| Balance history | Every balance change (increase / decrease / first) recorded and viewable |
+| Local usage stats | Listens to `llm/stream`, accumulates per-task and per-day tokens (in/out/cache-read) and cost |
+| Global floating HUD | Draggable ball `● DS ¥xx.xx` in the corner showing balance and current-task cost; hover to expand, click to open the console |
+| Per-task cost | Accumulates the current conversation's tokens and estimated cost in real time |
+| Official model list | Fetches `GET /models`, shows context window and price tiers |
+| Key never exposed | API key lives only in the local credentials store (`~/.dsh/.credentials.yaml`); the browser only ever sees `sk-****last4` |
+| No third-party deps | Backend uses `subprocess + curl` straight to the official API — no SDKs, no proxies |
+
+## 📊 Data sources
+
+- **Balance**: DeepSeek official `GET /user/balance` (`total_balance` / `granted_balance` / `topped_up_balance`), exponential backoff retry (1s/2s/4s, max 3), 401/403 never retried.
+- **Usage / cost**: Listens to the Harness `llm/stream` waterfall, tallies tokens and latency per call; cost is estimated from a configurable price table (official pricing by default, overridable in Advanced settings).
+- **Model list**: Official `GET /models`.
+
+> DeepSeek's official API has **no** usage/billing/log query endpoints — usage and cost here are **local estimates**, so they may differ slightly from the official bill (price tier, cache billing semantics).
+
+## 🏗 Architecture
+
+```
+┌────────────────────── Browser (Client half lib/client.js) ──────────────────────┐
+│  4-tab console (Overview/Models/Connection/Advanced) · floating HUD · Cordis card │
+│        │ same-origin fetch (/api/deepseek/*)                                     │
+└────────▼─────────────────────────────────────────────────────────────────────────┘
+┌────────────────────── Host process (Host half lib/index.js) ────────────────────┐
+│  DeepSeekClient ── subprocess + curl ──▶ Official API (/user/balance, /models)   │
+│  balance cache (5s) · history · per-task/per-day token & cost · persistence      │
+│  webServer routes /api/deepseek/* (plain HTTP for the browser, no RPC)           │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Data flow
+
+1. The client half polls `GET /api/deepseek/hud` every 2s (current task + balance summary) so the ball stays fresh.
+2. The Overview tab calls `GET /api/deepseek/account` (today/month totals) and `GET /api/deepseek/usage?range=7d`.
+3. The host half listens to `agent/status` (task boundaries) and `llm/stream` (token/cost accumulation), rolling into daily ledgers.
+4. History and config persist to `~/.dsh/storages/deepseek_console.json` — survives restarts.
+
+## 🔌 Install
+
+### Option 1: Bundle plugin (recommended, auto-enabled on boot)
+
+```sh
+# Install from a local path (link mode; code changes need no reinstall)
+dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
+
+# Restart the dsh web process
+# (Ctrl+C then run dsh web again, or however you start it)
+```
+
+After installing, **restart `dsh web`** — the plugin loads with the process; the floating ball appears at the bottom-right and 设置 → DeepSeek shows the console. In link mode, `node --check` + refresh the page after a code change; no reinstall needed.
+
+### Option 2: Manual composition row
+
+Merge `cordis.patch.yml` into `~/.dsh/profiles/web/cordis.patch.yml`:
+
+```yaml
+- insert:
+    - id: deepseek-console
+      name: '@local/dsh-deepseek-console'
+```
+
+Make sure the package is resolvable from the profile's `node_modules` (e.g. `~/.dsh/profiles/web/node_modules/@local/dsh-deepseek-console/`), then restart.
+
+> ⚠️ Use only ONE option — using both double-mounts the plugin (two host halves, two route registrations).
+
+## 🖥 Usage
+
+- **Floating ball** (bottom-right): shows `● DS ¥xx.xx`; hover to expand (balance / current-task cost), click to open the console; drag to reposition (edge-snapping, position persisted).
+- **设置 → DeepSeek**:
+  - **概览 Overview**: big balance number + cash/granted breakdown, today/month spend, current-task tokens & cost, balance-change history.
+  - **模型 Models**: official model list (context window, price tiers).
+  - **连接 Connection**: API key (written to the local credentials store only), Base URL, connection test.
+  - **高级设置 Advanced**: poll interval, cache TTL, timeout, cost-estimation price tier and per-model price table.
+
+## 🔑 API key
+
+Stored in the local credentials store (`~/.dsh/.credentials.yaml`, `DEEPSEEK_API_KEY`), or entered in the Connection tab. The key never leaves the host process; logs and the browser only see `sk-****last4`.
+
+## 🔐 Security model
+
+- The API key is read only through the `credentials` service — never written to the frontend, logs are masked.
+- `/api/deepseek/*` routes bind only to the local webServer (loopback), same-origin browser access.
+- Retries follow official rate-limit semantics: 401/403 fail immediately, 429/5xx/timeout back off.
+- Persisted files inherit the DSH storage directory permissions.
+
+## 🔧 Development
+
+```sh
+node --check lib/index.js     # host syntax
+node --check lib/client.js    # client syntax
+```
+
+- Host half: CJS, `module.exports = { name, inject, apply }`, optional services via `ctx.get('webServer'/'storage'/'credentials'/'subprocess')`.
+- Client half: `window.__ModuleLoader__.load` format, `require('react')`, same-origin `fetch` to `/api/deepseek/*`, `inject: ['timer', 'slots']`.
+- Refresh the page after edits (client-modules re-scans incrementally, rev changes automatically).
+
+## 🧾 Backend API
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/api/deepseek/account` | Account summary (balance / usage / sync status / key facts) |
+| GET | `/api/deepseek/balance?refresh=true` | Balance (cached; force with refresh) |
+| POST | `/api/deepseek/refresh` | Force-refresh balance |
+| GET | `/api/deepseek/usage?range=7d` | Per-day usage and totals (7d/30d/90d) |
+| GET | `/api/deepseek/history?limit=50` | Balance-change history |
+| GET | `/api/deepseek/calls?limit=20` | Recent model calls |
+| GET | `/api/deepseek/models` | Official model list + prices |
+| GET | `/api/deepseek/config` | Current config and key facts |
+| POST | `/api/deepseek/saveConfig` | Save config (poll/TTL/timeout/price tier) |
+| POST | `/api/deepseek/saveKey` | Save API key |
+| POST | `/api/deepseek/test` | Connection test |
+| GET | `/api/deepseek/hud` | HUD data (task + balance) |
+
+All responses use `{ code: 0, message: 'success', data: ... }`.
+
+## ⚖️ License
+
+[MIT](LICENSE)
