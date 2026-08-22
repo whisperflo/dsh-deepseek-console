@@ -17,6 +17,8 @@ Shipped as the official DSH plugin shape (Cordis bundle: host half + client half
 | Local usage stats | Listens to `llm/stream`, accumulates per-task and per-day tokens (in/out/cache-read) and cost |
 | Global floating HUD | Draggable ball `● DS ¥xx.xx` in the corner showing balance and current-task cost; hover to expand, click to open the console |
 | Per-task cost | Accumulates the current conversation's tokens and estimated cost in real time |
+| Budget alerts | Configure daily/session budgets; HUD badge + Overview red alert when exceeded |
+| Model tool | `deepseek_usage_report` — agents can query balance/usage/budget directly in-session |
 | Official model list | Fetches `GET /models`, shows context window and price tiers |
 | Key never exposed | API key lives only in the local credentials store (`~/.dsh/.credentials.yaml`); the browser only ever sees `sk-****last4` |
 | No third-party deps | Backend uses `subprocess + curl` straight to the official API — no SDKs, no proxies |
@@ -58,6 +60,9 @@ Shipped as the official DSH plugin shape (Cordis bundle: host half + client half
 # Install from a local path (link mode; code changes need no reinstall)
 dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
 
+# Or install directly from GitHub
+dsh plugin --profile web add github:whisperflo/dsh-deepseek-console
+
 # Restart the dsh web process
 # (Ctrl+C then run dsh web again, or however you start it)
 ```
@@ -80,12 +85,16 @@ Make sure the package is resolvable from the profile's `node_modules` (e.g. `~/.
 
 ## 🖥 Usage
 
-- **Floating ball** (bottom-right): shows `● DS ¥xx.xx`; hover to expand (balance / current-task cost), click to open the console; drag to reposition (edge-snapping, position persisted).
+- **Floating ball** (bottom-right): shows `● DS ¥xx.xx`; hover to expand (balance / current-task cost / budget status), click to open the console; drag to reposition (edge-snapping, position persisted). Click 刷新 (Refresh) to force a live balance sync (same path as the console's sync button).
 - **设置 → DeepSeek**:
-  - **概览 Overview**: big balance number + cash/granted breakdown, today/month spend, current-task tokens & cost, balance-change history.
+  - **概览 Overview**: big balance number + cash/granted breakdown, today/month spend, current-task tokens & cost, budget alert status, balance-change history.
   - **模型 Models**: official model list (context window, price tiers).
   - **连接 Connection**: API key (written to the local credentials store only), Base URL, connection test.
-  - **高级设置 Advanced**: poll interval, cache TTL, timeout, cost-estimation price tier and per-model price table.
+  - **高级设置 Advanced**: poll interval, cache TTL, timeout, daily/session budgets, cost-estimation price tier and per-model price table.
+
+### Query in-session
+
+Agents can call the read-only `deepseek_usage_report` tool to fetch balance, today/month usage & cost, budget status, and the current task — e.g. ask "how much have I spent on DeepSeek today?"
 
 ## 🔑 API key
 

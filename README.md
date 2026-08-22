@@ -17,6 +17,8 @@
 | 本地用量统计 | 监听 `llm/stream` 事件，按任务与按日累计 Token（输入/输出/缓存命中）与费用 |
 | 全局悬浮 HUD | 右下角可拖拽悬浮球 `● DS ¥xx.xx`，实时显示账户余额与当前任务费用；悬停展开、点击跳转设置页 |
 | 任务级费用 | 每次对话累计本次 Token 与估算费用，实时反映当前任务的花费 |
+| 预算告警 | 配置每日/会话预算后，费用超阈值时 HUD 徽标 + 概览页红色告警 |
+| 模型工具 | `deepseek_usage_report` 工具，Agent 会话中可直接查询余额/用量/预算 |
 | 官方模型清单 | 拉取 `GET /models`，展示模型上下文窗口与价格档位 |
 | Key 零暴露 | API Key 只存本机后端凭证库（`~/.dsh/.credentials.yaml`），浏览器端仅见 `sk-****末4位` |
 | 无第三方依赖 | 后端用 `subprocess + curl` 直连官方 API，不引入任何 SDK / 代理 |
@@ -58,6 +60,9 @@
 # 从本地路径安装（link 模式，改代码无需重装）
 dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
 
+# 或从 GitHub 直接安装
+dsh plugin --profile web add github:whisperflo/dsh-deepseek-console
+
 # 重启 DSH web 进程
 # （Ctrl+C 后重新 dsh web，或你的启动方式）
 ```
@@ -80,12 +85,16 @@ dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
 
 ## 🖥 使用
 
-- **悬浮球**（右下角）：显示 `● DS ¥xx.xx` 当前余额；悬停展开详情（余额 / 本次费用），点击打开控制台；按住可拖拽（位置自动吸附边缘并持久化）。
+- **悬浮球**（右下角）：显示 `● DS ¥xx.xx` 当前余额；悬停展开详情（余额 / 本次费用 / 预算状态），点击打开控制台；按住可拖拽（位置自动吸附边缘并持久化）。点「刷新」强制同步官方余额（与控制台「同步」同路径）。
 - **设置 → DeepSeek**：
-  - **概览**：余额大数字 + 现金/赠送明细、今日/本月消费、当前任务 Token 与费用、余额变化历史。
+  - **概览**：余额大数字 + 现金/赠送明细、今日/本月消费、当前任务 Token 与费用、预算告警状态、余额变化历史。
   - **模型**：官方模型清单（上下文窗口、价格档位）。
   - **连接**：API Key 配置（只写本机凭证库）、Base URL、连接测试。
-  - **高级设置**：轮询间隔、缓存 TTL、超时、费用估算价格档位与模型价格表。
+  - **高级设置**：轮询间隔、缓存 TTL、超时、每日/会话预算、费用估算价格档位与模型价格表。
+
+### Agent 会话中查询
+
+模型可直接调用 `deepseek_usage_report` 工具（只读）查询余额、今日/本月用量与费用、预算状态、当前任务——例如问"我今天 DeepSeek 花了多少钱"。
 
 ## 🔑 API Key 配置
 
