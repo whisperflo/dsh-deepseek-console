@@ -19,7 +19,8 @@ Shipped as the official DSH plugin shape (Cordis bundle: host half + client half
 | Local usage stats | Listens to `llm/stream`, accumulates per-task and per-day tokens (in/out/cache-read) and cost |
 | Global floating HUD | Draggable ball `● DS ¥xx.xx` in the corner showing balance and current-task cost; hover to expand, click to open the console |
 | Per-task cost | Accumulates the current conversation's tokens and estimated cost in real time |
-| Budget alerts | Configure daily/session budgets; HUD badge + Overview red alert when exceeded |
+| Budget alerts | Configure daily/session budgets; HUD badge + Overview red alert when exceeded (advisory only, calls unaffected) |
+| Daily spend limit (hard) | Independent toggle. When on, new DeepSeek calls are **rejected** once the day's estimated cost hits the cap (in-flight streams unaffected, other providers untouched); when off, no limiting at all and the amount is retained; auto-resets next day. On limit reached the HUD shows a banner with one-click jump to Advanced settings |
 | Model tool | `deepseek_usage_report` — agents can query balance/usage/budget directly in-session |
 | Official model list | Fetches `GET /models`, shows context window and price tiers |
 | Key never exposed | API key lives only in the local credentials store (`~/.dsh/.credentials.yaml`); the browser only ever sees `sk-****last4` |
@@ -28,7 +29,7 @@ Shipped as the official DSH plugin shape (Cordis bundle: host half + client half
 ## 📊 Data sources
 
 - **Balance**: DeepSeek official `GET /user/balance` (`total_balance` / `granted_balance` / `topped_up_balance`), exponential backoff retry (1s/2s/4s, max 3), 401/403 never retried.
-- **Usage / cost**: Listens to the Harness `llm/stream` waterfall, tallies tokens and latency per call; cost is estimated from a configurable price table (official pricing by default, overridable in Advanced settings).
+- **Usage / cost**: Listens to the Harness `llm/stream` waterfall, tallies tokens and latency per call; cost is estimated from the built-in price table (official peak pricing, fixed in UI).
 - **Model list**: Official `GET /models`.
 
 > DeepSeek's official API has **no** usage/billing/log query endpoints — usage and cost here are **local estimates**, so they may differ slightly from the official bill (price tier, cache billing semantics).
@@ -89,10 +90,10 @@ Make sure the package is resolvable from the profile's `node_modules` (e.g. `~/.
 
 - **Floating ball** (bottom-right): shows `● DS ¥xx.xx`; hover to expand (balance / current-task cost / budget status), click to open the console; drag to reposition (edge-snapping, position persisted). Click 刷新 (Refresh) to force a live balance sync (same path as the console's sync button).
 - **设置 → DeepSeek**:
-  - **概览 Overview**: big balance number + cash/granted breakdown, today/month spend, current-task tokens & cost, budget alert status, balance-change history.
+  - **概览 Overview**: big balance number + cash/granted breakdown, today/month spend, current-task tokens & cost, budget alert status, daily-limit remaining, balance-change history.
   - **模型 Models**: official model list (context window, price tiers).
   - **连接 Connection**: API key (written to the local credentials store only), Base URL, connection test.
-  - **高级设置 Advanced**: poll interval, cache TTL, timeout, daily/session budgets, cost-estimation price tier and per-model price table.
+  - **高级设置 Advanced**: poll interval, cache TTL, timeout, daily spend limit (hard: toggle + amount + today progress bar), daily/session budgets (advisory).
 
 ### Query in-session
 
