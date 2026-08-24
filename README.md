@@ -2,6 +2,8 @@
 
 [中文](README.md) · [English](README_EN.md)
 
+[![dshfind](https://dshfind.com/api/badge/whisperflo/dsh-deepseek-console?lang=zh)](https://dshfind.com/zh/plugins/whisperflo/dsh-deepseek-console?ref=badge)
+
 > 一个为 DeepSeek Harness Web GUI 打造的 **DeepSeek 账户控制台**：官方 API 直连的实时余额监控、本地用量/费用统计、全局悬浮 HUD。
 
 模型每思考一次，余额都在变化——这个插件让你随时看到花了多少钱。它通过 DeepSeek **官方** `GET /user/balance` 接口同步余额（现金/赠送分离），监听本机模型调用统计 Token 与费用，并以一个可拖拽的全局悬浮球常驻界面右下角。

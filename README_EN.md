@@ -2,6 +2,8 @@
 
 [中文](README.md) · [English](README_EN.md)
 
+[![dshfind](https://dshfind.com/api/badge/whisperflo/dsh-deepseek-console?lang=en)](https://dshfind.com/zh/plugins/whisperflo/dsh-deepseek-console?ref=badge)
+
 > A **DeepSeek account console** for the DeepSeek Harness Web GUI: real-time balance monitoring against the official API, local usage/cost statistics, and a global floating HUD.
 
 Every model thought moves your balance — this plugin lets you always see what it costs. It syncs your balance (cash/granted separated) through the DeepSeek **official** `GET /user/balance` endpoint, tallies tokens and costs from local model calls, and keeps a draggable floating ball in the corner of the UI.
