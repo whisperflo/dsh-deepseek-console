@@ -106,6 +106,7 @@ Key 存于本机凭证库（`~/.dsh/.credentials.yaml`，`DEEPSEEK_API_KEY`）�
 
 - API Key 仅经 `credentials` 服务读取，绝不写入前端、日志脱敏。
 - `/api/deepseek/*` 路由仅绑定本机 webServer（loopback），同源浏览器访问。
+- **CSRF 防护**：所有 POST 写操作（saveKey / saveConfig / refresh / test / webhook）校验 `Origin`——跨站来源（恶意网页向 localhost 发起的表单 POST）返回 `4031` 拦截；curl 等不带 `Origin` 的本机客户端不受影响。防止跨站篡改 `baseURL` 导致 Key 外泄。
 - 请求重试遵循官方限流语义：401/403 立即失败不重试，429/5xx/超时退避重试。
 - 持久化文件权限默认继承 DSH storage 目录。
 
@@ -135,7 +136,7 @@ node --check lib/client.js    # client 语法
 | POST | `/api/deepseek/saveConfig` | 保存配置（轮询/TTL/超时/价格档） |
 | POST | `/api/deepseek/saveKey` | 保存 API Key |
 | POST | `/api/deepseek/test` | 连接测试 |
-| GET | `/api/deepseek/hud` | 悬浮球数据（任务 + 余额） |
+| GET | `/api/deepseek/hud` | 悬浮球数据（任务 + 余额 + 预算状态） |
 
 所有响应均为 `{ code: 0, message: 'success', data: ... }`。
 
