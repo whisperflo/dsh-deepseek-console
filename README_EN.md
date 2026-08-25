@@ -89,10 +89,10 @@ Merge `cordis.patch.yml` into `~/.dsh/profiles/web/cordis.patch.yml`:
 ```yaml
 - insert:
     - id: deepseek-console
-      name: '@local/dsh-deepseek-console'
+      name: '@hzjjxc/dsh-deepseek-console'
 ```
 
-Make sure the package is resolvable from the profile's `node_modules` (e.g. `~/.dsh/profiles/web/node_modules/@local/dsh-deepseek-console/`), then restart.
+Make sure the package is resolvable from the profile's `node_modules` (e.g. `~/.dsh/profiles/web/node_modules/@hzjjxc/dsh-deepseek-console/`), then restart.
 
 > ⚠️ Use only ONE option — using both double-mounts the plugin (two host halves, two route registrations).
 

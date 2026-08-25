@@ -89,10 +89,10 @@ dsh plugin --profile web add github:whisperflo/dsh-deepseek-console
 ```yaml
 - insert:
     - id: deepseek-console
-      name: '@local/dsh-deepseek-console'
+      name: '@hzjjxc/dsh-deepseek-console'
 ```
 
-并确保包位于 profile 可解析的 `node_modules` 下（如 `~/.dsh/profiles/web/node_modules/@local/dsh-deepseek-console/`），然后重启。
+并确保包位于 profile 可解析的 `node_modules` 下（如 `~/.dsh/profiles/web/node_modules/@hzjjxc/dsh-deepseek-console/`），然后重启。
 
 > ⚠️ 两种方式二选一，不要同时使用，否则会双挂载（两套 host 路由）。
 
