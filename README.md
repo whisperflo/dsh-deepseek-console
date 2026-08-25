@@ -76,6 +76,18 @@ dsh plugin --profile web add @hzjjxc/dsh-deepseek-console
 # （Ctrl+C 后重新 dsh web，或你的启动方式）
 ```
 
+### 更新插件
+
+发布新版本后，已安装 npm 版的用户可以在终端执行：
+
+```sh
+dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
+```
+
+也可以打开「设置 → DeepSeek」里的更新提示，查看变更内容并点击「立即更新」。更新完成后需要重启 `dsh web`，新的 Host / Client 代码才会加载；现有 API Key、余额历史和本地用量数据会保留。
+
+使用 `link:` 本地开发模式时，不要点击包更新；修改源码后刷新页面，涉及 Host 代码时重启 `dsh web` 即可。
+
 ### 方式二：GitHub / 本地开发
 
 ```sh

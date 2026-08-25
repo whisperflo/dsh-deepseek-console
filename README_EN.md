@@ -76,6 +76,18 @@ dsh plugin --profile web add @hzjjxc/dsh-deepseek-console
 # (Ctrl+C then run dsh web again, or however you start it)
 ```
 
+### Update the plugin
+
+For npm installations, users can update from the terminal:
+
+```sh
+dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
+```
+
+The Settings → DeepSeek panel also checks for updates, shows the changelog, and provides an “Update now” button. Restart `dsh web` after installation so the new Host and Client code is loaded. Existing credentials, balance history, and local usage data are preserved.
+
+For `link:` development installs, edit the source directly and refresh the page; restart `dsh web` when Host code changes.
+
 ### Option 2: GitHub / local development
 
 ```sh
