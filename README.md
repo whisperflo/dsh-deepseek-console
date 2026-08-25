@@ -177,7 +177,7 @@ node --check lib/client.js    # client 语法
 | GET | `/api/deepseek/balance?refresh=true` | 余额（带缓存，可强制刷新） |
 | POST | `/api/deepseek/refresh` | 强制刷新余额 |
 | GET | `/api/deepseek/usage?range=7d` | 按日用量与合计（7d/30d/90d） |
-| GET | `/api/deepseek/history?limit=50` | 余额变化历史 |
+| GET | `/api/deepseek/history?limit=50&offset=0` | 余额变化历史（返回 `entries` 和 `total`） |
 | GET | `/api/deepseek/calls?limit=20` | 最近模型调用 |
 | GET | `/api/deepseek/models` | 官方模型清单 + 价格 |
 | GET | `/api/deepseek/config` | 当前配置与 Key 事实 |
