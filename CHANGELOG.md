@@ -1,5 +1,17 @@
 # 更新日志
 
+## [1.5.5] - 2026-08-25
+
+### 修复
+
+- 更新按钮改为安装刚刚检查到的 npm 最新版本，避免受旧 semver 范围或 lockfile 影响。
+
+### 更新命令
+
+```sh
+npm exec --yes --package=@deepseek-ai/dsh -- dsh plugin --profile web update --latest @hzjjxc/dsh-deepseek-console
+```
+
 ## [1.5.4] - 2026-08-25
 
 - 修复更新中心无法读取对应版本变更记录的问题。

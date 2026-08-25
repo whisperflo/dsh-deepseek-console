@@ -90,7 +90,7 @@ Open Settings → DeepSeek. The plugin checks for updates automatically:
 You can also update from the terminal:
 
 ```sh
-dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
+npm exec --yes --package=@deepseek-ai/dsh -- dsh plugin --profile web update --latest @hzjjxc/dsh-deepseek-console
 ```
 
 #### Versions before 1.5.0
@@ -98,7 +98,7 @@ dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
 Older versions do not have the update center. Upgrade once from the terminal:
 
 ```sh
-dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
+npm exec --yes --package=@deepseek-ai/dsh -- dsh plugin --profile web update --latest @hzjjxc/dsh-deepseek-console
 ```
 
 After upgrading to 1.5.0 or later, future updates can be installed from the Settings panel. Existing credentials, balance history, and local usage data are preserved.

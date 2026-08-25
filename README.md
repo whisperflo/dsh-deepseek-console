@@ -90,7 +90,7 @@ dsh plugin --profile web add @hzjjxc/dsh-deepseek-console
 也可以在终端执行：
 
 ```sh
-dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
+npm exec --yes --package=@deepseek-ai/dsh -- dsh plugin --profile web update --latest @hzjjxc/dsh-deepseek-console
 ```
 
 #### 1.5.0 之前版本
@@ -98,7 +98,7 @@ dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
 旧版本没有内置更新中心，因此第一次升级需要手动执行：
 
 ```sh
-dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
+npm exec --yes --package=@deepseek-ai/dsh -- dsh plugin --profile web update --latest @hzjjxc/dsh-deepseek-console
 ```
 
 升级到 1.5.0 或更高版本后，后续就可以直接使用设置页里的「检查更新」和「立即更新」。
