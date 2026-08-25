@@ -78,13 +78,30 @@ dsh plugin --profile web add @hzjjxc/dsh-deepseek-console
 
 ### Update the plugin
 
-For npm installations, users can update from the terminal:
+#### Version 1.5.0 and later
+
+Open Settings → DeepSeek. The plugin checks for updates automatically:
+
+1. Click “Check for updates” to query the latest npm version.
+2. If an update is available, click “View changes” to read the summary.
+3. Click “Update now” and confirm the installation.
+4. Restart `dsh web` after installation so the new Host / Client code is loaded.
+
+You can also update from the terminal:
 
 ```sh
 dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
 ```
 
-The Settings → DeepSeek panel also checks for updates, shows the changelog, and provides an “Update now” button. Restart `dsh web` after installation so the new Host and Client code is loaded. Existing credentials, balance history, and local usage data are preserved.
+#### Versions before 1.5.0
+
+Older versions do not have the update center. Upgrade once from the terminal:
+
+```sh
+dsh plugin --profile web update @hzjjxc/dsh-deepseek-console
+```
+
+After upgrading to 1.5.0 or later, future updates can be installed from the Settings panel. Existing credentials, balance history, and local usage data are preserved.
 
 For `link:` development installs, edit the source directly and refresh the page; restart `dsh web` when Host code changes.
 
