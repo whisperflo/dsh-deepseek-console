@@ -21,6 +21,16 @@ Shipped as the official DSH plugin shape (Cordis bundle: host half + client half
 | Per-task cost | Accumulates the current conversation's tokens and estimated cost in real time |
 | Budget alerts | Configure daily/session budgets; HUD badge + Overview red alert when exceeded (advisory only, calls unaffected) |
 | Daily spend limit (hard) | Independent toggle. When on, new DeepSeek calls are **rejected** once the day's estimated cost hits the cap (in-flight streams unaffected, other providers untouched); when off, no limiting at all and the amount is retained; auto-resets next day. On limit reached the HUD shows a banner with one-click jump to Advanced settings |
+| Spend trend chart | Today (hourly) / 7d / 30d SVG line chart with hover details |
+| Model spend share | Per-model cost / tokens / calls / share (today / month) |
+| Request log | Unified request log with status/model/range filters; click to expand full details incl. error types |
+| Source stats | Spend by entry point (Chat / Agent / internal) to spot what is consuming |
+| Balance warning | One-time HUD alert + overview badge when balance drops below threshold (separate from budget alerts) |
+| Finance estimates | Runway days (7-day average), today's cost extrapolation, spend-rate anomaly detection; hidden when data is insufficient |
+| Cost protection | Auto-downgrade to a cheaper model at N% of the daily limit (hard limit takes precedence) |
+| Per-model local toggle | Enable/disable a model locally (blocked by this plugin only; official account untouched) |
+| API health | 24h success/error stats by class + step-by-step diagnose (network→auth→models→balance, zero cost) |
+| Unified request log | `~/.dsh/storages/deepseek_requests.db` (node:sqlite, auto-fallback to memory) |
 | Model tool | `deepseek_usage_report` — agents can query balance/usage/budget directly in-session |
 | Official model list | Fetches `GET /models`, shows context window and price tiers |
 | Key never exposed | API key lives only in the local credentials store (`~/.dsh/.credentials.yaml`); the browser only ever sees `sk-****last4` |
