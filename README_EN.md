@@ -67,22 +67,28 @@ Shipped as the official DSH plugin shape (Cordis bundle: host half + client half
 
 ## 🔌 Install
 
-### Option 1: Bundle plugin (recommended, auto-enabled on boot)
+### Option 1: npm (recommended, auto-enabled on boot)
 
 ```sh
-# Install from a local path (link mode; code changes need no reinstall)
-dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
-
-# Or install directly from GitHub
-dsh plugin --profile web add github:whisperflo/dsh-deepseek-console
+dsh plugin --profile web add @hzjjxc/dsh-deepseek-console
 
 # Restart the dsh web process
 # (Ctrl+C then run dsh web again, or however you start it)
 ```
 
+### Option 2: GitHub / local development
+
+```sh
+# Install directly from GitHub
+dsh plugin --profile web add github:whisperflo/dsh-deepseek-console
+
+# Or local link mode (code changes need no reinstall)
+dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
+```
+
 After installing, **restart `dsh web`** — the plugin loads with the process; the floating ball appears at the bottom-right and 设置 → DeepSeek shows the console. In link mode, `node --check` + refresh the page after a code change; no reinstall needed.
 
-### Option 2: Manual composition row
+### Option 3: Manual composition row
 
 Merge `cordis.patch.yml` into `~/.dsh/profiles/web/cordis.patch.yml`:
 

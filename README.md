@@ -67,22 +67,28 @@
 
 ## 🔌 安装
 
-### 方式一：组合插件（推荐，开机自动启用）
+### 方式一：npm 安装（推荐，开机自动启用）
 
 ```sh
-# 从本地路径安装（link 模式，改代码无需重装）
-dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
-
-# 或从 GitHub 直接安装
-dsh plugin --profile web add github:whisperflo/dsh-deepseek-console
+dsh plugin --profile web add @hzjjxc/dsh-deepseek-console
 
 # 重启 DSH web 进程
 # （Ctrl+C 后重新 dsh web，或你的启动方式）
 ```
 
+### 方式二：GitHub / 本地开发
+
+```sh
+# 从 GitHub 直接安装
+dsh plugin --profile web add github:whisperflo/dsh-deepseek-console
+
+# 或本地 link 模式（改代码无需重装）
+dsh plugin --profile web add link:/path/to/deepseek-console-plugin/composition
+```
+
 安装后 **重启 `dsh web`**，插件随进程自动加载；右下角出现悬浮球，设置 → DeepSeek 出现控制台。link 模式下改代码后 `node --check` + 刷新页面即可，无需重装。
 
-### 方式二：手动组合行
+### 方式三：手动组合行
 
 把 `cordis.patch.yml` 的内容并入 `~/.dsh/profiles/web/cordis.patch.yml`：
 
